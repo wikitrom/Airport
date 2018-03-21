@@ -1,0 +1,240 @@
+@startuml
+
+' settings
+' --------------------------------------------
+' skinparam classAttributeIconSize 0
+title Flight Base - Class Diagram
+
+' define packages/namespaces and/or classes
+' note:  may contain internal relations
+' -----------------------------------------
+
+
+' --- Application/UI
+
+/'
+ ' package "application" as appl {
+ ' 	class main
+ ' }
+ ' 
+ ' package ui {
+ ' 
+ ' class "userInterface" as ui 
+ ' 
+ ' }
+ ' 
+ ' ' --- Exceptions
+ ' package "exception" as except {
+ '   class BookingException
+ ' }
+ '/
+
+
+' --- utilities
+package utilities {
+
+enum TicketClassType {
+     ECONOMY, BUSINESS
+  }
+
+enum TicketStatusType {
+     RESERVED,
+     BOOKED,
+     CONFIRMED,
+     CANCELED
+  }
+
+enum SeatStatusType {
+     FREE,
+     RESERVED
+  }
+
+enum AirplaneStatusType {
+     IN_SERVICE,
+     OUT_OF_SERVICE
+  }
+
+enum FlightStatusType {
+     PLANNED,
+     CONFIRMED,
+     TAXING,
+     TAKEOFF
+     IN_FLIGHT,
+     LANDING,
+     FINISHED
+  }
+
+class "TicketPrice" as tPrice {
+      priceList : Map<TicketClassType, Integer>
+      ECONOMY = 5000
+      BUSINESS = 10000
+      + TicketPrice()   // set price for each class
+      + getPrice(TicketClassType class) : int
+  }
+
+}
+
+
+package "model.foodService" {
+
+abstract class "Menu" as menu {
+      drinks[] : Map<name,price>
+      foods[] : Map<name,price>
+      +  {abstract} displayMenu() : void
+      +  getFoodOrDrink(name) : Map<name,price>
+  }
+
+class "EconomyMenu" as eMenu {
+      + EconomyMenu()  // populate drinks/foods
+      +  displayMenu() : void
+      - displayHeader() : void
+      - displayDrinkMenu() : void
+      - displayFoodMenu() : void
+  }
+
+class "BusinessMenu" as bMenu {
+      + BusinessMenu()  // populate drinks/foods
+      +  displayMenu() : void
+      - displayHeader() : void
+      - displayDrinkMenu() : void
+      - displayFoodMenu() : void
+
+  }
+
+class "Kitchen" as kitchen {
+      - tmpMeal : Meal
+
+      +cookMeal : Meal
+  }
+
+class "Meal" as meal {
+      eatable[] : Map<name,price>   // items selected from menu
+      + displayMeal() : void
+      + getTotalPrice() : int
+      + addEatable(Map<String,price> item) : boolean
+      + removeEatable(Map<String,price> item) : void
+}
+
+' - package interanal relations 
+menu <|-down- bMenu 
+menu <|-down- eMenu 
+kitchen -down- meal : > instantiates
+
+}  /' end package foodService '/
+
+
+
+
+' --- booking service
+
+' --- airline service
+package "model.airlineService" {
+
+class "Airline" as airline {
+      - airplanes[] : List<Airplane>
+      - flights[] : : HashSet<> ???
+
+      + Airline() : // constructor creates 1 flight+airplane
+      + displayAirplanes() : void
+      + displayFlights() : void
+      + getFlight(flightId) : Flight
+  }
+
+class "Airplane" as airplane {
+      - id : int
+      - name : string
+      - noOfSeats : int
+      - status : AirplaneStatusType
+      
+  }
+
+class "Flight" as flight {
+      - id : int  // ???
+      - callId : string
+      - destination : string
+      - etd : Date
+      - eta : Date
+      - status : FlightStatusType
+      - seats[] : Seat
+      - economySeatStartNo : int
+      - noOfEconomySeats : int
+      - businessSeatStartNo : int
+      - noOfBusinessSeats : int
+
+  }
+
+class "Seat" as seat {
+      - SeatNo : int
+      - class : TicketClassType
+      - status : SeatStatusType
+ }
+ 
+' - package interanal relations
+flight *-down- seat
+airline "*" o-down- "1" airplane
+airline "*" o-right- "1" flight
+}
+
+package "model.bookingService" {
+
+class "Booker" as booker {
+      tickets : List<Ticket> // belong to Flight???
+      
+      + makeReservaton() : int // ticketId
+      + confirmReservation(ticketId : int) : boolean
+      + cancelReservation(ticketId : int)
+      + displayTickets() : void
+      + displayTickets(status : TicketStatusType) : void
+      + displayAvailableSeats() : void
+      + displayAvailableSeats(class : TicketClassType) : void
+  }
+
+class "Ticket" as ticket {
+ - id : int
+ - status : TicketStatusType
+ - class : TicketClassType
+ - customer : Customer
+ - meal : Meal
+ - flight : Flight
+ - seatNo : int
+
+--
+methods...
+  }
+
+
+class "Customer" as customer {
+      - id : int
+      - name : String
+      - age : int
+      - gender : GenderType
+      - phone : String
+
+      + getName()
+      + getAge()
+      + getGender()
+      + getPhone()
+      + getId()
+  }
+
+' - package interanal relations
+
+booker o-down- ticket
+ticket "1" *- "1" customer
+
+}  /' end package: model.bookingService '/
+
+
+' define relations between packages/interfaces
+' --------------------------------------------
+ticket "0..1" o- "1" meal
+ticket "1" o- "1" flight
+
+' define hidden relations to control image layout
+' -----------------------------------------------
+'customer -[hidden]- booker
+'ui -[hidden]- booker
+'airline -[hidden]- booker
+'airlineService -[hidden]- bookingService
+
+@enduml
