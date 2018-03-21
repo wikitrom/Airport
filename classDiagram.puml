@@ -33,7 +33,7 @@ title Flight Base - Class Diagram
 ' --- utilities
 package utilities {
 
-enum TicketClassType {
+enum TicketType {
      ECONOMY, BUSINESS
   }
 
@@ -65,11 +65,11 @@ enum FlightStatusType {
   }
 
 class "TicketPrice" as tPrice {
-      priceList : Map<TicketClassType, Integer>
+      priceList : Map<TicketType, Integer>
       ECONOMY = 5000
       BUSINESS = 10000
       + TicketPrice()   // set price for each class
-      + getPrice(TicketClassType class) : int
+      + getPrice(TicketType class) : int
   }
 
 }
@@ -104,7 +104,7 @@ class "BusinessMenu" as bMenu {
 class "Kitchen" as kitchen {
       - tmpMeal : Meal
 
-      +cookMeal(TicketClassType ticketClass) : Meal
+      +cookMeal(TicketType ticketClass) : Meal
   }
 
 class "Meal" as meal {
@@ -165,7 +165,7 @@ class "Flight" as flight {
 
 class "Seat" as seat {
       - SeatNo : int
-      - class : TicketClassType
+      - class : TicketType
       - status : SeatStatusType
  }
  
@@ -186,13 +186,13 @@ class "Booker" as booker {
       + displayTickets() : void
       + displayTickets(status : TicketStatusType) : void
       + displayAvailableSeats() : void
-      + displayAvailableSeats(class : TicketClassType) : void
+      + displayAvailableSeats(class : TicketType) : void
   }
 
 class "Ticket" as ticket {
  - id : int
  - status : TicketStatusType
- - class : TicketClassType
+- class : TicketType
  - customer : Customer
  - meal : Meal
  - flight : Flight
