@@ -104,7 +104,7 @@ class "BusinessMenu" as bMenu {
 class "Kitchen" as kitchen {
       - tmpMeal : Meal
 
-      +cookMeal : Meal
+      +cookMeal(TicketClassType ticketClass) : Meal
   }
 
 class "Meal" as meal {
